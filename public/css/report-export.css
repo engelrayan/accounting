@@ -1,0 +1,104 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+body.re-body {
+    font-family: "DejaVu Sans", sans-serif;
+    direction: rtl;
+    color: #111827;
+    background: #ffffff;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.re-shell {
+    padding: 24px;
+}
+
+.re-shell--wide {
+    padding: 18px;
+}
+
+.re-header {
+    display: table;
+    width: 100%;
+    margin-bottom: 18px;
+    border-bottom: 2px solid #1d4ed8;
+    padding-bottom: 12px;
+}
+
+.re-header > div {
+    display: table-cell;
+    vertical-align: top;
+}
+
+.re-header > div:last-child {
+    text-align: left;
+}
+
+.re-kicker {
+    color: #2563eb;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.re-header h1 {
+    margin: 0 0 6px;
+    font-size: 22px;
+}
+
+.re-header p,
+.re-meta span,
+.re-note {
+    margin: 0;
+    color: #4b5563;
+}
+
+.re-grid {
+    width: 100%;
+}
+
+.re-card {
+    border: 1px solid #dbe1ea;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 14px;
+    page-break-inside: avoid;
+}
+
+.re-card h2 {
+    margin: 0 0 10px;
+    font-size: 15px;
+}
+
+.re-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.re-table th,
+.re-table td {
+    border: 1px solid #dbe1ea;
+    padding: 8px 10px;
+    text-align: right;
+}
+
+.re-table thead th {
+    background: #eff6ff;
+    font-weight: 700;
+}
+
+.re-list {
+    margin: 0;
+    padding: 0 18px 0 0;
+}
+
+.re-list li {
+    margin-bottom: 8px;
+}
+
+.re-list span {
+    display: block;
+    color: #4b5563;
+}
