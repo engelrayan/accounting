@@ -146,14 +146,16 @@ class LeaveController extends Controller
 
         $query = $manager->teamLeaveRequests()
             ->with(['leaveType', 'employee'])
-            ->latest();
+            ->orderByDesc('leave_requests.created_at');
 
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $query->where('leave_requests.status', $request->status);
         }
 
         $leaves      = $query->paginate(20)->withQueryString();
-        $pendingCount = $manager->teamLeaveRequests()->where('status', 'pending')->count();
+        $pendingCount = $manager->teamLeaveRequests()
+            ->where('leave_requests.status', 'pending')
+            ->count();
 
         return view('employee.leaves.team', compact('leaves', 'manager', 'pendingCount'));
     }

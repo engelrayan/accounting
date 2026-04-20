@@ -114,7 +114,9 @@ class Employee extends Model implements AuthenticatableContract
     /** عدد طلبات الإجازة المعلّقة للفريق */
     public function pendingTeamLeavesCount(): int
     {
-        return $this->teamLeaveRequests()->where('status', 'pending')->count();
+        return $this->teamLeaveRequests()
+            ->where('leave_requests.status', 'pending')
+            ->count();
     }
 
     /** كم يوم استخدم الموظف من نوع إجازة معين هذا العام */
