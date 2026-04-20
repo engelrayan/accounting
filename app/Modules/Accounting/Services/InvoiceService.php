@@ -205,7 +205,7 @@ class InvoiceService
     {
         $companyId = $invoice->company_id;
 
-        $arAccount      = $this->resolveAccount($companyId, '1130', 'asset',   ['ذمم مدينة', 'عملاء']);
+        $arAccount      = $this->resolveOrCreateAccount($companyId, '1130', 'asset', 'ذمم مدينة (عملاء)', 'debit', '1100');
         $revenueAccount = $this->resolveOrCreateAccount($companyId, '4100', 'revenue', 'إيرادات المبيعات', 'credit', '4000');
 
         $customerName = $invoice->customer?->name ?? '—';
@@ -245,7 +245,7 @@ class InvoiceService
     {
         $companyId = $payment->company_id;
 
-        $arAccount = $this->resolveAccount($companyId, '1130', 'asset', ['ذمم مدينة', 'عملاء']);
+        $arAccount = $this->resolveOrCreateAccount($companyId, '1130', 'asset', 'ذمم مدينة (عملاء)', 'debit', '1100');
 
         $cashAccount = in_array($payment->payment_method, ['bank', 'bank_transfer', 'instapay', 'cheque'])
             ? $this->resolveOrCreateAccount($companyId, '1120', 'asset', 'البنك', 'debit', '1100')
