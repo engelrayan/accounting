@@ -9,6 +9,7 @@
    Boot
    -------------------------------------------------------------------------- */
 document.addEventListener('DOMContentLoaded', () => {
+    Sidebar.init();
     UI.init();
     TrialBalance.init();
     AccountCards.init();
@@ -23,6 +24,130 @@ document.addEventListener('DOMContentLoaded', () => {
     BalanceSheetTree.init();
     BankReconciliation.init();
 });
+
+/* --------------------------------------------------------------------------
+   Sidebar — desktop collapse + mobile overlay drawer
+   -------------------------------------------------------------------------- */
+const Sidebar = {
+    STORAGE_KEY: 'ac.sidebar.collapsed',
+    MOBILE_QUERY: '(max-width: 900px)',
+
+    init() {
+        this.body = document.body;
+        this.sidebar = document.getElementById('accounting-sidebar');
+        this.toggleBtn = document.querySelector('[data-sidebar-toggle]');
+        this.closeBtn = document.querySelector('[data-sidebar-close]');
+        this.overlay = document.querySelector('[data-sidebar-overlay]');
+        this.media = window.matchMedia(this.MOBILE_QUERY);
+
+        if (!this.sidebar || !this.toggleBtn) return;
+
+        this.prepareLabels();
+        this.applyStoredState();
+        this.bindEvents();
+        this.syncMode();
+    },
+
+    prepareLabels() {
+        this.sidebar.querySelectorAll('.ac-sidebar__link').forEach((link) => {
+            const label = link.textContent.trim().replace(/\s+/g, ' ');
+            link.dataset.sidebarLabel = label;
+            link.setAttribute('title', label);
+            link.setAttribute('aria-label', label);
+        });
+    },
+
+    bindEvents() {
+        this.toggleBtn.addEventListener('click', () => this.toggle());
+        this.closeBtn?.addEventListener('click', () => this.closeMobile());
+        this.overlay?.addEventListener('click', () => this.closeMobile());
+
+        this.sidebar.querySelectorAll('.ac-sidebar__link').forEach((link) => {
+            link.addEventListener('click', () => {
+                if (this.isMobile()) {
+                    this.closeMobile();
+                }
+            });
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                this.closeMobile();
+            }
+        });
+
+        if (this.media.addEventListener) {
+            this.media.addEventListener('change', () => this.syncMode());
+        } else if (this.media.addListener) {
+            this.media.addListener(() => this.syncMode());
+        }
+    },
+
+    toggle() {
+        if (this.isMobile()) {
+            this.body.classList.toggle('ac-sidebar-mobile-open');
+            this.body.classList.toggle('ac-no-scroll', this.body.classList.contains('ac-sidebar-mobile-open'));
+            this.updateAria();
+            return;
+        }
+
+        const collapsed = this.body.classList.toggle('ac-sidebar-collapsed');
+        this.saveCollapsedState(collapsed);
+        this.updateAria();
+    },
+
+    closeMobile() {
+        this.body.classList.remove('ac-sidebar-mobile-open', 'ac-no-scroll');
+        this.updateAria();
+    },
+
+    applyStoredState() {
+        if (this.isMobile()) return;
+
+        const collapsed = this.getCollapsedState();
+        this.body.classList.toggle('ac-sidebar-collapsed', collapsed);
+        this.updateAria();
+    },
+
+    syncMode() {
+        if (this.isMobile()) {
+            this.body.classList.remove('ac-no-scroll');
+            this.body.classList.remove('ac-sidebar-mobile-open');
+        } else {
+            this.applyStoredState();
+        }
+
+        this.updateAria();
+    },
+
+    updateAria() {
+        const expanded = this.isMobile()
+            ? this.body.classList.contains('ac-sidebar-mobile-open')
+            : !this.body.classList.contains('ac-sidebar-collapsed');
+
+        this.toggleBtn?.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    },
+
+    isMobile() {
+        return this.media?.matches ?? window.innerWidth <= 900;
+    },
+
+    getCollapsedState() {
+        try {
+            return window.localStorage.getItem(this.STORAGE_KEY) === '1';
+        } catch (error) {
+            return false;
+        }
+    },
+
+    saveCollapsedState(collapsed) {
+        try {
+            window.localStorage.setItem(this.STORAGE_KEY, collapsed ? '1' : '0');
+        } catch (error) {
+            // Keeping the UI functional is more important than persistence.
+        }
+    },
+};
 
 /* --------------------------------------------------------------------------
    Progress Bars — read data-pct attribute and set width

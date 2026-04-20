@@ -4,8 +4,16 @@ use App\Http\Controllers\DevLoginController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    if (auth()->check()) {
+        return redirect('/admin');
+    }
+
+    return view('landing');
 });
+
+Route::get('/admin', fn() => redirect('/admin/accounting'))
+    ->middleware('auth')
+    ->name('admin.dashboard');
 
 // Required by Laravel's auth middleware — redirects unauthenticated users here
 Route::get('/login', fn() => redirect()->route('dev.login'))->name('login');

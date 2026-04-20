@@ -13,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'employee.auth' => \App\Modules\Accounting\Http\Middleware\EnsureEmployeeAuthenticated::class,
+            'module' => \App\Modules\Accounting\Http\Middleware\CheckModuleEnabled::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

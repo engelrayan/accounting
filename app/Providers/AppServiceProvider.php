@@ -8,7 +8,14 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function register(): void
+    {
+        $helpers = app_path('Support/helpers.php');
+
+        if (file_exists($helpers)) {
+            require_once $helpers;
+        }
+    }
 
     public function boot(): void
     {
