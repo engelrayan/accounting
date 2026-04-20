@@ -196,7 +196,7 @@ class PurchaseInvoiceService
     private function postPurchaseJournalEntry(PurchaseInvoice $invoice, array $items): void
     {
         $companyId        = $invoice->company_id;
-        $apAccount        = $this->resolveAccount($companyId, '2110', 'liability', ['ذمم دائنة', 'موردون', 'موردين']);
+        $apAccount        = $this->resolveOrCreateAccountsPayableAccount($companyId);
         $purchaseAccount  = $this->resolveOrCreateAccount($companyId, '5100', 'expense', 'المشتريات',  'debit', '5000');
         $inventoryAccount = $this->resolveOrCreateAccount($companyId, '1300', 'asset',   'المخزون',    'debit', '1000');
 
@@ -258,7 +258,7 @@ class PurchaseInvoiceService
     private function postPaymentJournalEntry(PurchasePayment $payment, PurchaseInvoice $invoice): void
     {
         $companyId = $payment->company_id;
-        $apAccount = $this->resolveAccount($companyId, '2110', 'liability', ['ذمم دائنة', 'موردون', 'موردين']);
+        $apAccount = $this->resolveOrCreateAccountsPayableAccount($companyId);
 
         $cashAccount = in_array($payment->payment_method, ['bank', 'instapay', 'cheque'])
             ? $this->resolveOrCreateAccount($companyId, '1120', 'asset', 'البنك', 'debit', '1100')
@@ -287,6 +287,60 @@ class PurchaseInvoiceService
     // -------------------------------------------------------------------------
     // Account resolution helpers
     // -------------------------------------------------------------------------
+
+    private function resolveOrCreateAccountsPayableAccount(int $companyId): Account
+    {
+        $account = Account::where('tenant_id', $companyId)
+            ->where('type', 'liability')
+            ->where(function ($q) {
+                $q->where('code', '2110')
+                  ->orWhere('name', 'like', '%ذمم دائنة%')
+                  ->orWhere('name', 'like', '%موردون%')
+                  ->orWhere('name', 'like', '%موردين%');
+            })
+            ->orderByRaw("CASE WHEN code = '2110' THEN 0 ELSE 1 END")
+            ->first();
+
+        if ($account) {
+            return $account;
+        }
+
+        $liabilities = Account::firstOrCreate(
+            ['tenant_id' => $companyId, 'code' => '2000'],
+            [
+                'parent_id' => null,
+                'name' => 'الالتزامات',
+                'type' => 'liability',
+                'normal_balance' => 'credit',
+                'is_system' => true,
+                'is_active' => true,
+            ],
+        );
+
+        $currentLiabilities = Account::firstOrCreate(
+            ['tenant_id' => $companyId, 'code' => '2100'],
+            [
+                'parent_id' => $liabilities->id,
+                'name' => 'الالتزامات المتداولة',
+                'type' => 'liability',
+                'normal_balance' => 'credit',
+                'is_system' => true,
+                'is_active' => true,
+            ],
+        );
+
+        return Account::firstOrCreate(
+            ['tenant_id' => $companyId, 'code' => '2110'],
+            [
+                'parent_id' => $currentLiabilities->id,
+                'name' => 'ذمم دائنة (موردون)',
+                'type' => 'liability',
+                'normal_balance' => 'credit',
+                'is_system' => true,
+                'is_active' => true,
+            ],
+        );
+    }
 
     private function resolveAccount(int $companyId, string $code, string $type, array $nameFragments): Account
     {
