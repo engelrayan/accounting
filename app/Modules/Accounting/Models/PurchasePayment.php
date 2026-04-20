@@ -62,6 +62,7 @@ class PurchasePayment extends Model
             'instapay' => 'إنستاباي',
             'cheque'   => 'شيك',
             'card'     => 'بطاقة',
+            'settlement' => 'تسوية حساب',
             'other'    => 'أخرى',
             default    => $method,
         };
@@ -76,6 +77,7 @@ class PurchasePayment extends Model
             'instapay' => '📱',
             'cheque'   => '📄',
             'card'     => '💳',
+            'settlement' => '✓',
             default    => '💰',
         };
     }

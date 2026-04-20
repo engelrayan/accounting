@@ -185,8 +185,11 @@ class InvoiceService
             $invoice->paid_amount = Payment::where('invoice_id', $invoice->id)->sum('amount');
             $invoice->save();
 
-            // ── GL: DR نقد/بنك  CR ذمم مدينة ─────────────────────────────
-            $this->postPaymentJournalEntry($payment, $invoice);
+            // Account settlements are posted by CustomerService as discount/bad debt
+            // journal entries, not as cash/bank receipts.
+            if (($payment->payment_method ?? '') !== 'settlement') {
+                $this->postPaymentJournalEntry($payment, $invoice);
+            }
 
             return $payment;
         });

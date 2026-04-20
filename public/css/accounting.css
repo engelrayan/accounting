@@ -4575,6 +4575,7 @@ svg { display: block; flex-shrink: 0; }
 .ac-pay-method-pill--instapay { background: #fef9c3; color: #a16207; }
 .ac-pay-method-pill--cheque   { background: #f1f5f9; color: #475569; }
 .ac-pay-method-pill--card     { background: #fee2e2; color: #b91c1c; }
+.ac-pay-method-pill--settlement { background: #fff7ed; color: #c2410c; }
 .ac-pay-method-pill--other    { background: var(--ac-border); color: var(--ac-text-muted); }
 
 /* ── Filter bar ── */

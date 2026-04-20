@@ -43,6 +43,7 @@ class JournalEntry extends Model
             'payment'          => 'دفعة عميل',
             'purchase_invoice' => 'فاتورة مشتريات',
             'purchase_payment' => 'دفعة مورد',
+            'vendor_opening_balance' => 'رصيد افتتاحي مورد',
             'credit_note'      => 'إشعار دائن',
             'expense'          => 'مصروف',
             'asset'            => 'أصل ثابت',
@@ -60,6 +61,7 @@ class JournalEntry extends Model
             'payment'          => '💰',
             'purchase_invoice' => '🛒',
             'purchase_payment' => '💳',
+            'vendor_opening_balance' => '🏁',
             'credit_note'      => '📋',
             'expense'          => '📉',
             'asset'            => '🏢',
@@ -75,6 +77,7 @@ class JournalEntry extends Model
         return match ($referenceType) {
             'invoice', 'credit_note'             => 'posted',
             'payment', 'settlement'              => 'draft',
+            'vendor_opening_balance'             => 'posted',
             'purchase_invoice','purchase_payment'=> 'pending',
             'expense', 'asset'                   => 'reversed',
             default                              => 'pending',

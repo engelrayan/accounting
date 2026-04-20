@@ -3,6 +3,7 @@
 namespace App\Modules\Accounting\Services;
 
 use App\Modules\Accounting\Models\Account;
+use App\Modules\Accounting\Models\JournalEntry;
 use App\Modules\Accounting\Models\PurchaseInvoice;
 use App\Modules\Accounting\Models\Vendor;
 use Illuminate\Support\Collection;
@@ -211,13 +212,110 @@ class VendorService
 
     public function createVendor(array $data, int $companyId): Vendor
     {
-        return Vendor::create([
-            'company_id'      => $companyId,
-            'name'            => $data['name'],
-            'phone'           => $data['phone']           ?? null,
-            'email'           => $data['email']           ?? null,
-            'address'         => $data['address']         ?? null,
-            'opening_balance' => $data['opening_balance'] ?? 0,
+        return DB::transaction(function () use ($data, $companyId) {
+            $vendor = Vendor::create([
+                'company_id'      => $companyId,
+                'name'            => $data['name'],
+                'phone'           => $data['phone']           ?? null,
+                'email'           => $data['email']           ?? null,
+                'address'         => $data['address']         ?? null,
+                'opening_balance' => $data['opening_balance'] ?? 0,
+            ]);
+
+            $this->postOpeningBalanceEntry($vendor);
+
+            return $vendor;
+        });
+    }
+
+    public function postOpeningBalanceEntry(Vendor $vendor): void
+    {
+        $amount = round((float) $vendor->opening_balance, 2);
+
+        if ($amount <= 0) {
+            return;
+        }
+
+        $alreadyPosted = JournalEntry::query()
+            ->where('tenant_id', $vendor->company_id)
+            ->where('reference_type', 'vendor_opening_balance')
+            ->where('reference_id', $vendor->id)
+            ->where('status', '!=', 'reversed')
+            ->exists();
+
+        if ($alreadyPosted) {
+            return;
+        }
+
+        $apAccount = $this->resolveOrCreateAccount(
+            $vendor->company_id,
+            '2110',
+            'liability',
+            'ذمم دائنة (موردون)',
+            'credit',
+            '2100',
+        );
+
+        $openingEquityAccount = $this->resolveOrCreateAccount(
+            $vendor->company_id,
+            '3300',
+            'equity',
+            'الأرباح المحتجزة / أرصدة افتتاحية',
+            'credit',
+            '3000',
+        );
+
+        $entry = $this->journalEntryService->createEntry(
+            [
+                'company_id' => $vendor->company_id,
+                'description' => "رصيد افتتاحي مستحق للمورد [{$vendor->name}]",
+                'entry_date' => now()->toDateString(),
+                'reference_type' => 'vendor_opening_balance',
+                'reference_id' => $vendor->id,
+            ],
+            [
+                [
+                    'account_id' => $openingEquityAccount->id,
+                    'debit' => $amount,
+                    'credit' => 0,
+                    'description' => 'تحميل الرصيد الافتتاحي على حقوق الملكية الافتتاحية',
+                ],
+                [
+                    'account_id' => $apAccount->id,
+                    'debit' => 0,
+                    'credit' => $amount,
+                    'description' => "التزام افتتاحي للمورد {$vendor->name}",
+                ],
+            ],
+        );
+
+        $this->journalEntryService->postEntry($entry);
+    }
+
+    private function resolveOrCreateAccount(
+        int $companyId,
+        string $code,
+        string $type,
+        string $name,
+        string $normalBalance,
+        string $parentCode,
+    ): Account {
+        $existing = Account::where('tenant_id', $companyId)->where('code', $code)->first();
+        if ($existing) {
+            return $existing;
+        }
+
+        $parent = Account::where('tenant_id', $companyId)->where('code', $parentCode)->first();
+
+        return Account::create([
+            'tenant_id' => $companyId,
+            'parent_id' => $parent?->id,
+            'code' => $code,
+            'name' => $name,
+            'type' => $type,
+            'normal_balance' => $normalBalance,
+            'is_system' => true,
+            'is_active' => true,
         ]);
     }
 }

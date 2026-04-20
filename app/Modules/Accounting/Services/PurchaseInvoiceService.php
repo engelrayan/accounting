@@ -174,8 +174,11 @@ class PurchaseInvoiceService
             $invoice->paid_amount = PurchasePayment::where('purchase_invoice_id', $invoice->id)->sum('amount');
             $invoice->save(); // booted() syncs remaining_amount + status
 
-            // ── GL: DR Accounts Payable  CR Cash/Bank ─────────────────────
-            $this->postPaymentJournalEntry($payment, $invoice);
+            // Vendor settlements are posted by VendorService as AP/discount entries,
+            // not as cash/bank payments.
+            if (($payment->payment_method ?? '') !== 'settlement') {
+                $this->postPaymentJournalEntry($payment, $invoice);
+            }
 
             return $payment;
         });
