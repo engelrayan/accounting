@@ -52,9 +52,8 @@ class VendorStatementReport
             ->sum('amount');
 
         $paymentsBefore = DB::table('purchase_payments as pp')
-            ->join('purchase_invoices as pi', 'pi.id', '=', 'pp.purchase_invoice_id')
-            ->where('pi.company_id', $vendor->company_id)
-            ->where('pi.vendor_id', $vendor->id)
+            ->where('pp.company_id', $vendor->company_id)
+            ->where('pp.vendor_id', $vendor->id)
             ->where('pp.payment_date', '<', $from)
             ->sum('pp.amount');
 
@@ -86,16 +85,16 @@ class VendorStatementReport
 
         // ── Payments within range ───────────────────────────────────────────
         $payments = DB::table('purchase_payments as pp')
-            ->join('purchase_invoices as pi', 'pi.id', '=', 'pp.purchase_invoice_id')
-            ->where('pi.company_id', $vendor->company_id)
-            ->where('pi.vendor_id', $vendor->id)
+            ->leftJoin('purchase_invoices as pi', 'pi.id', '=', 'pp.purchase_invoice_id')
+            ->where('pp.company_id', $vendor->company_id)
+            ->where('pp.vendor_id', $vendor->id)
             ->whereBetween('pp.payment_date', [$from, $to])
             ->orderBy('pp.payment_date')
             ->orderBy('pp.id')
             ->select([
                 'pp.id',
                 DB::raw("'payment' as type"),
-                DB::raw("CONCAT('دفعة — ', pi.invoice_number) as reference"),
+                DB::raw("CASE WHEN pi.invoice_number IS NULL THEN CONCAT('دفعة حساب مورد #', pp.id) ELSE CONCAT('دفعة — ', pi.invoice_number) END as reference"),
                 'pp.notes as description',
                 'pp.payment_date as event_date',
                 'pp.amount as debit',    // payment = reducing what we owe (debit)

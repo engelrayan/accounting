@@ -5,6 +5,7 @@ namespace App\Modules\Accounting\Services;
 use App\Modules\Accounting\Models\Account;
 use App\Modules\Accounting\Models\JournalEntry;
 use App\Modules\Accounting\Models\PurchaseInvoice;
+use App\Modules\Accounting\Models\PurchasePayment;
 use App\Modules\Accounting\Models\Vendor;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -32,20 +33,25 @@ class VendorService
     {
         $row = DB::table('purchase_invoices')
             ->where('vendor_id', $vendor->id)
+            ->where('status', '!=', 'cancelled')
             ->selectRaw('SUM(amount) as invoiced, SUM(paid_amount) as paid')
             ->first();
 
-        return (float) $vendor->opening_balance + (float) ($row->invoiced ?? 0) - (float) ($row->paid ?? 0);
+        $totalPaid = PurchasePayment::where('vendor_id', $vendor->id)->sum('amount');
+
+        return (float) $vendor->opening_balance + (float) ($row->invoiced ?? 0) - (float) $totalPaid;
     }
 
     public function getTotalInvoiced(Vendor $vendor): float
     {
-        return (float) PurchaseInvoice::where('vendor_id', $vendor->id)->sum('amount');
+        return (float) PurchaseInvoice::where('vendor_id', $vendor->id)
+            ->where('status', '!=', 'cancelled')
+            ->sum('amount');
     }
 
     public function getTotalPaid(Vendor $vendor): float
     {
-        return (float) PurchaseInvoice::where('vendor_id', $vendor->id)->sum('paid_amount');
+        return (float) PurchasePayment::where('vendor_id', $vendor->id)->sum('amount');
     }
 
     /**
@@ -55,12 +61,176 @@ class VendorService
      */
     public function bulkAggregates(int $companyId): Collection
     {
-        return DB::table('purchase_invoices')
+        $invoices = DB::table('purchase_invoices')
             ->where('company_id', $companyId)
+            ->where('status', '!=', 'cancelled')
             ->groupBy('vendor_id')
-            ->selectRaw('vendor_id, SUM(amount) as total_invoiced, SUM(paid_amount) as total_paid')
+            ->selectRaw('vendor_id, SUM(amount) as total_invoiced')
             ->get()
             ->keyBy('vendor_id');
+
+        $payments = DB::table('purchase_payments')
+            ->where('company_id', $companyId)
+            ->groupBy('vendor_id')
+            ->selectRaw('vendor_id, SUM(amount) as total_paid')
+            ->get()
+            ->keyBy('vendor_id');
+
+        return $invoices->keys()
+            ->merge($payments->keys())
+            ->unique()
+            ->mapWithKeys(fn ($vendorId) => [
+                $vendorId => (object) [
+                    'vendor_id' => $vendorId,
+                    'total_invoiced' => (float) ($invoices->get($vendorId)->total_invoiced ?? 0),
+                    'total_paid' => (float) ($payments->get($vendorId)->total_paid ?? 0),
+                ],
+            ]);
+    }
+
+    public function recordPayment(Vendor $vendor, array $data): array
+    {
+        $amount = round((float) $data['amount'], 2);
+        $balance = round($this->getBalance($vendor), 2);
+
+        if ($amount <= 0) {
+            throw new \DomainException('المبلغ يجب أن يكون أكبر من صفر.');
+        }
+
+        if ($amount > $balance + 0.001) {
+            throw new \DomainException(
+                'المبلغ أكبر من المستحق (' . number_format($balance, 2) . ').'
+            );
+        }
+
+        return DB::transaction(function () use ($vendor, $data, $amount) {
+            $remaining = $amount;
+            $invoiceAmount = 0.0;
+            $openingAmount = 0.0;
+            $payments = collect();
+
+            foreach ($this->paymentAllocationInvoices($vendor, $data['purchase_invoice_id'] ?? null) as $invoice) {
+                if ($remaining <= 0.001) {
+                    break;
+                }
+
+                $invoiceRemaining = round((float) $invoice->remaining(), 2);
+                if ($invoiceRemaining <= 0) {
+                    continue;
+                }
+
+                $lineAmount = min($remaining, $invoiceRemaining);
+
+                $payments->push($this->createPurchasePayment($vendor, $invoice, $lineAmount, $data));
+
+                $invoice->paid_amount = PurchasePayment::where('purchase_invoice_id', $invoice->id)->sum('amount');
+                $invoice->save();
+
+                $invoiceAmount += $lineAmount;
+                $remaining = round($remaining - $lineAmount, 2);
+            }
+
+            if ($remaining > 0.001) {
+                $openingAmount = $remaining;
+                $payments->push($this->createPurchasePayment($vendor, null, $openingAmount, $data, true));
+            }
+
+            $this->createVendorPaymentJournalEntry($vendor, $amount, $data);
+
+            return [
+                'payment' => $payments->first(),
+                'payments' => $payments,
+                'invoiceAmount' => round($invoiceAmount, 2),
+                'openingAmount' => round($openingAmount, 2),
+            ];
+        });
+    }
+
+    private function paymentAllocationInvoices(Vendor $vendor, mixed $preferredInvoiceId): Collection
+    {
+        $query = PurchaseInvoice::where('vendor_id', $vendor->id)
+            ->whereIn('status', ['pending', 'partial']);
+
+        $invoices = $query
+            ->orderByRaw('COALESCE(due_date, issue_date) asc')
+            ->orderBy('id')
+            ->get();
+
+        if (! $preferredInvoiceId) {
+            return $invoices;
+        }
+
+        $preferred = $invoices->firstWhere('id', (int) $preferredInvoiceId);
+        if (! $preferred) {
+            return $invoices;
+        }
+
+        return collect([$preferred])
+            ->merge($invoices->reject(fn (PurchaseInvoice $invoice) => $invoice->id === $preferred->id))
+            ->values();
+    }
+
+    private function createPurchasePayment(
+        Vendor $vendor,
+        ?PurchaseInvoice $invoice,
+        float $amount,
+        array $data,
+        bool $againstOpeningBalance = false,
+    ): PurchasePayment {
+        $notes = $data['notes'] ?? null;
+
+        if ($againstOpeningBalance) {
+            $notes = trim(($notes ? "{$notes} - " : '') . 'سداد على حساب المورد / الرصيد الافتتاحي');
+        }
+
+        return PurchasePayment::create([
+            'company_id' => $vendor->company_id,
+            'vendor_id' => $vendor->id,
+            'purchase_invoice_id' => $invoice?->id,
+            'amount' => round($amount, 2),
+            'payment_method' => $data['payment_method'] ?? 'cash',
+            'payment_date' => $data['payment_date'] ?? now()->toDateString(),
+            'notes' => $notes,
+        ]);
+    }
+
+    private function createVendorPaymentJournalEntry(Vendor $vendor, float $amount, array $data): void
+    {
+        $companyId = $vendor->company_id;
+        $method = $data['payment_method'] ?? 'cash';
+        $paymentDate = $data['payment_date'] ?? now()->toDateString();
+
+        $apAccount = $this->resolveOrCreateAccount(
+            $companyId,
+            '2110',
+            'liability',
+            'ذمم دائنة (موردون)',
+            'credit',
+            '2100',
+        );
+
+        $cashAccount = in_array($method, ['bank', 'instapay', 'cheque'], true)
+            ? $this->resolveOrCreateAccount($companyId, '1120', 'asset', 'البنك', 'debit', '1100')
+            : $this->resolveOrCreateAccount($companyId, '1110', 'asset', 'الصندوق', 'debit', '1100');
+
+        $methodLabel = PurchasePayment::methodLabel($method);
+        $description = "دفعة على حساب المورد [{$vendor->name}] — {$methodLabel}";
+
+        $entry = $this->journalEntryService->createEntry(
+            [
+                'company_id' => $companyId,
+                'description' => $description,
+                'entry_date' => $paymentDate,
+                'reference_type' => 'vendor_payment',
+                'reference_id' => $vendor->id,
+            ],
+            [
+                ['account_id' => $apAccount->id, 'debit' => $amount, 'credit' => 0],
+                ['account_id' => $cashAccount->id, 'debit' => 0, 'credit' => $amount],
+            ],
+        );
+
+        $this->journalEntryService->postEntry($entry);
     }
 
     // -------------------------------------------------------------------------

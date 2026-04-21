@@ -3,10 +3,8 @@
 namespace App\Modules\Accounting\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Accounting\Models\PurchaseInvoice;
 use App\Modules\Accounting\Models\Vendor;
 use App\Modules\Accounting\Services\ActivityLogService;
-use App\Modules\Accounting\Services\PurchaseInvoiceService;
 use App\Modules\Accounting\Services\VendorService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,7 +16,6 @@ class VendorController extends Controller
 {
     public function __construct(
         private readonly VendorService          $service,
-        private readonly PurchaseInvoiceService $invoiceService,
         private readonly ActivityLogService     $log,
     ) {}
 
@@ -111,6 +108,7 @@ class VendorController extends Controller
         $vendor->load([
             'purchaseInvoices',
             'purchaseInvoices.payments',
+            'purchasePayments.purchaseInvoice',
         ]);
 
         $balance       = $this->service->getBalance($vendor);
@@ -120,6 +118,7 @@ class VendorController extends Controller
         $unpaidInvoices  = $vendor->purchaseInvoices->filter(fn ($inv) => $inv->isUnpaid());
         $overdueInvoices = $vendor->purchaseInvoices->filter(fn ($inv) => $inv->isOverdue());
         $pendingInvoices = $unpaidInvoices;
+        $allPayments     = $vendor->purchasePayments;
 
         return view('accounting.vendors.show', compact(
             'vendor',
@@ -129,6 +128,7 @@ class VendorController extends Controller
             'unpaidInvoices',
             'overdueInvoices',
             'pendingInvoices',
+            'allPayments',
         ));
     }
 
@@ -144,7 +144,7 @@ class VendorController extends Controller
             'payment_date'        => 'required|date',
             'payment_method'      => 'required|in:cash,bank,wallet,instapay,cheque,card,other',
             'purchase_invoice_id' => [
-                'required',
+                'nullable',
                 'integer',
                 Rule::exists('purchase_invoices', 'id')->where('vendor_id', $vendor->id),
             ],
@@ -154,31 +154,36 @@ class VendorController extends Controller
             'payment_date.required'        => 'تاريخ الدفع مطلوب.',
             'payment_method.required'      => 'طريقة الدفع مطلوبة.',
             'payment_method.in'            => 'طريقة الدفع غير صالحة.',
-            'purchase_invoice_id.required' => 'يجب تحديد الفاتورة المرتبطة بالدفعة.',
             'purchase_invoice_id.exists'   => 'الفاتورة المحددة غير موجودة.',
         ]);
 
-        $invoice = PurchaseInvoice::findOrFail($validated['purchase_invoice_id']);
-
         try {
-            $payment = $this->invoiceService->recordPayment($invoice, [
+            $result = $this->service->recordPayment($vendor, [
                 'amount'         => $validated['amount'],
                 'payment_method' => $validated['payment_method'],
                 'payment_date'   => $validated['payment_date'],
+                'purchase_invoice_id' => $validated['purchase_invoice_id'] ?? null,
                 'notes'          => $validated['notes'] ?? null,
             ]);
         } catch (\DomainException $e) {
             return back()->withErrors(['payment' => $e->getMessage()]);
         }
 
+        $payment = $result['payment'];
+
         $this->log->log(
             $request->user()->company_id,
             'created', 'purchase_payment', $payment->id,
             $vendor->name,
-            "سجَّل دفعة بمبلغ {$payment->amount} للمورد [{$vendor->name}] على الفاتورة [{$invoice->invoice_number}]."
+            "سجّل دفعة على حساب المورد [{$vendor->name}] بمبلغ {$validated['amount']}."
         );
 
-        return back()->with('success', 'تم تسجيل الدفعة بنجاح.');
+        $message = 'تم تسجيل الدفعة بنجاح.';
+        if (($result['openingAmount'] ?? 0) > 0) {
+            $message .= ' تم تحميل ' . number_format($result['openingAmount'], 2) . ' على الرصيد الافتتاحي/حساب المورد.';
+        }
+
+        return back()->with('success', $message);
     }
 
     // -------------------------------------------------------------------------

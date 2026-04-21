@@ -102,9 +102,6 @@
         </div>
         <div class="ac-dash-card__amount ac-text-success">{{ number_format($totalPaid, 2) }}</div>
         <div class="ac-dash-card__footer">
-            @php
-            $allPayments = $vendor->purchaseInvoices->flatMap(fn($inv) => $inv->payments);
-            @endphp
             {{ $allPayments->count() }} دفعة مسجَّلة
         </div>
     </div>
@@ -219,7 +216,7 @@
                 <div class="ac-form-row">
                     <div class="ac-form-group">
                         <label class="ac-label ac-label--required" for="pay_amount">المبلغ</label>
-                        <input type="number" step="0.01" min="0.01"
+                        <input type="number" step="0.01" min="0.01" max="{{ max(0, $balance) }}"
                                id="pay_amount" name="amount"
                                class="ac-control ac-control--num {{ $errors->has('amount') ? 'ac-control--error' : '' }}"
                                placeholder="0.00" value="{{ old('amount') }}" required>
@@ -235,11 +232,11 @@
                 </div>
 
                 <div class="ac-form-group">
-                    <label class="ac-label ac-label--required" for="pay_invoice">الفاتورة</label>
+                    <label class="ac-label" for="pay_invoice">تطبيق الدفعة</label>
                     @if($pendingInvoices->isNotEmpty())
                     <select id="pay_invoice" name="purchase_invoice_id"
-                            class="ac-select {{ $errors->has('purchase_invoice_id') ? 'ac-select--error' : '' }}" required>
-                        <option value="">— اختر الفاتورة —</option>
+                            class="ac-select {{ $errors->has('purchase_invoice_id') ? 'ac-select--error' : '' }}">
+                        <option value="">تلقائي — على حساب المورد بالكامل</option>
                         @foreach($pendingInvoices->sortBy('issue_date') as $inv)
                             <option value="{{ $inv->id }}" {{ old('purchase_invoice_id') == $inv->id ? 'selected' : '' }}>
                                 {{ $inv->invoice_number }}
@@ -249,8 +246,11 @@
                     </select>
                     @error('purchase_invoice_id') <span class="ac-field-error">{{ $message }}</span> @enderror
                     @else
-                    <p class="ac-text-muted" style="font-size:.85rem;">لا توجد فواتير مستحقة لهذا المورد.</p>
+                    <p class="ac-text-muted" style="font-size:.85rem;">لا توجد فواتير مستحقة. سيتم تسجيل الدفعة على الرصيد الافتتاحي/حساب المورد.</p>
                     @endif
+                    <p class="ac-text-muted" style="font-size:.8rem;margin-top:6px;">
+                        يمكنك دفع مبلغ أكبر من فاتورة واحدة طالما لا يتجاوز إجمالي المستحق على المورد.
+                    </p>
                 </div>
 
                 <div class="ac-form-group">
@@ -285,7 +285,7 @@
                 @error('payment') <div class="ac-alert ac-alert--error ac-mt-2">{{ $message }}</div> @enderror
 
                 <button type="submit" class="ac-btn ac-btn--success ac-btn--full"
-                        @if($pendingInvoices->isEmpty()) disabled title="لا توجد فواتير مستحقة" @endif>
+                        @if($balance <= 0) disabled title="لا يوجد رصيد مستحق" @endif>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <polyline points="20 6 9 17 4 12"/>
                     </svg>
