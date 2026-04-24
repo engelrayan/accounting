@@ -85,7 +85,8 @@
       "Bash(php -l app/Modules/Accounting/Services/RecurringEntryService.php)",
       "Bash(php -l app/Modules/Accounting/Http/Controllers/EmployeeController.php)",
       "Bash(php -l app/Modules/Accounting/Http/Controllers/Employee/AuthController.php)",
-      "Bash(xargs ls:*)"
+      "Bash(xargs ls:*)",
+      "Bash(php -l \"C:\\\\xampp\\\\htdocs\\\\sinbad-accounting-system\\\\app\\\\Modules\\\\Accounting\\\\Http\\\\Controllers\\\\DashboardController.php\")"
     ]
   }
 }
