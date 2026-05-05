@@ -292,4 +292,30 @@ return [
         'route' => 'accounting.reports.vat-report',
         'active_routes' => ['accounting.reports.vat-report'],
     ],
+
+    'price_lists' => [
+        'key' => 'price_lists',
+        'default_label' => 'قوائم الأسعار',
+        'section' => 'التسعير',
+        'icon' => 'price_list',
+        'route' => 'accounting.price-lists.index',
+        'active_routes' => ['accounting.price-lists.*'],
+    ],
+
+    'governorates' => [
+        'key' => 'governorates',
+        'default_label' => 'المحافظات',
+        'section' => 'التسعير',
+        'icon' => 'governorates',
+        'route' => 'accounting.governorates.index',
+        'active_routes' => ['accounting.governorates.*'],
+    ],
+    'customer_shipments' => [
+        'key' => 'customer_shipments',
+        'default_label' => 'شحنات العملاء',
+        'section' => 'التسعير',
+        'icon' => 'customer_shipments',
+        'route' => 'accounting.customer-shipments.index',
+        'active_routes' => ['accounting.customer-shipments.*'],
+    ],
 ];

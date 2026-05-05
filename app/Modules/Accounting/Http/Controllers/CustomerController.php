@@ -31,6 +31,7 @@ class CustomerController extends Controller
 
         $customers = Customer::forCompany($companyId)
             ->withCount('invoices')
+            ->with(['priceLists:id,name,is_active'])
             ->orderBy('name')
             ->get();
 
@@ -118,6 +119,7 @@ class CustomerController extends Controller
             'invoices.payments',
             'payments',
             'payments.invoice:id,invoice_number',
+            'priceLists:id,name,is_active',
         ]);
 
         $balance       = $this->service->getBalance($customer);

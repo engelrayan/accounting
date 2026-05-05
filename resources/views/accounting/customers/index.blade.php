@@ -118,6 +118,7 @@
                 <tr>
                     <th>العميل</th>
                     <th>الهاتف</th>
+                    <th>قائمة الأسعار</th>
                     <th class="ac-table__num">الفواتير</th>
                     <th class="ac-table__num">إجمالي الفواتير</th>
                     <th class="ac-table__num">المحصَّل</th>
@@ -145,6 +146,17 @@
                         </div>
                     </td>
                     <td class="ac-table__muted">{{ $customer->phone ?: '—' }}</td>
+                    <td>
+                        @forelse($customer->priceLists as $pl)
+                            <a href="{{ route('accounting.price-lists.show', $pl) }}"
+                               class="ac-pl-cust-badge {{ $pl->is_active ? '' : 'ac-pl-cust-badge--inactive' }}"
+                               title="{{ $pl->name }}">
+                                {{ Str::limit($pl->name, 22) }}
+                            </a>
+                        @empty
+                            <span class="ac-table__muted">—</span>
+                        @endforelse
+                    </td>
                     <td class="ac-table__num">{{ $customer->invoices_count }}</td>
                     <td class="ac-table__num">
                         {{ number_format($customer->totalInvoiced ?? 0, 2) }}
@@ -182,7 +194,7 @@
             @if($customers->count() > 1)
             <tfoot>
                 <tr class="ac-table__foot-total">
-                    <td colspan="5" class="ac-font-bold">إجمالي الذمم</td>
+                    <td colspan="6" class="ac-font-bold">إجمالي الذمم</td>
                     <td class="ac-table__num ac-font-bold {{ $totalReceivable > 0 ? 'ac-text-danger' : '' }}">
                         {{ number_format($totalReceivable, 2) }}
                     </td>

@@ -9117,3 +9117,1045 @@ body.ac-modal-open { overflow: hidden; }
         align-items: stretch;
     }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Section 53 — Price Lists & Governorates
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Two-column page layout ────────────────────────────────────────────── */
+.ac-pl-layout {
+    display: grid;
+    grid-template-columns: 1fr 270px;
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.ac-pl-main { display: flex; flex-direction: column; gap: 1rem; position: relative; z-index: 2; }
+.ac-pl-side  { display: flex; flex-direction: column; gap: 1rem; position: relative; z-index: 1; }
+
+.ac-pl-create-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .75rem;
+}
+
+.ac-pl-create-summary__item {
+    background: var(--ac-surface);
+    border: 1px solid var(--ac-border);
+    border-radius: .65rem;
+    padding: .8rem .9rem;
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+}
+
+.ac-pl-create-summary__label {
+    font-size: .75rem;
+    color: var(--ac-text-muted);
+}
+
+.ac-pl-create-summary__value {
+    font-size: .92rem;
+    color: var(--ac-text);
+    line-height: 1.45;
+}
+
+.ac-pl-create-hero {
+    background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+    border: 1px solid #bfdbfe;
+}
+
+.ac-pl-create-hero__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: .7rem;
+}
+
+.ac-pl-create-hero__title {
+    margin: .2rem 0 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.ac-pl-create-hero__badge {
+    font-size: .72rem;
+    font-weight: 700;
+    color: #1d4ed8;
+    background: #dbeafe;
+    border-radius: 999px;
+    padding: .25rem .6rem;
+    white-space: nowrap;
+}
+
+.ac-pl-create-hero__steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .55rem;
+}
+
+.ac-pl-create-hero__step {
+    font-size: .8rem;
+    color: var(--ac-text);
+    background: rgba(255,255,255,.8);
+    border: 1px solid #dbeafe;
+    border-radius: .45rem;
+    padding: .45rem .55rem;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+}
+
+.ac-pl-create-hero__step span {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #2563eb;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .7rem;
+    font-weight: 700;
+}
+
+.ac-pl-create-muted {
+    margin: .25rem 0 0;
+    font-size: .8rem;
+    color: var(--ac-text-muted);
+}
+
+/* ── Info row (name + description side by side) ────────────────────────── */
+.ac-pl-info-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.ac-pl-create-tools {
+    margin-bottom: .65rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .7rem;
+    flex-wrap: wrap;
+}
+
+.ac-pl-create-tools__meta {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    flex-wrap: wrap;
+}
+
+.ac-pl-create-check {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .8rem;
+    color: var(--ac-text-muted);
+    cursor: pointer;
+}
+
+.ac-pl-inline-alert {
+    margin-bottom: .75rem;
+}
+
+.ac-pl-create-search-wrap {
+    width: min(360px, 100%);
+}
+
+.ac-pl-create-search {
+    width: 100%;
+}
+
+.ac-pl-create-counter {
+    font-size: .78rem;
+    color: var(--ac-text-muted);
+    background: var(--ac-bg);
+    border: 1px solid var(--ac-border);
+    border-radius: 999px;
+    padding: .2rem .55rem;
+    white-space: nowrap;
+}
+
+/* ── Table header bar ──────────────────────────────────────────────────── */
+.ac-pl-tbl-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .65rem;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+
+.ac-pl-tbl-header__actions {
+    display: flex;
+    gap: .35rem;
+    flex-wrap: wrap;
+}
+
+/* ── Bulk price bar ────────────────────────────────────────────────────── */
+.ac-pl-bulk-bar {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: .5rem;
+    padding: .6rem 1rem;
+    margin-bottom: .75rem;
+    flex-wrap: wrap;
+}
+
+.ac-pl-bulk-bar__count {
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--ac-primary);
+    white-space: nowrap;
+    min-width: 80px;
+}
+
+.ac-pl-bulk-bar__fields {
+    display: flex;
+    align-items: flex-end;
+    gap: .75rem;
+    flex: 1;
+    flex-wrap: wrap;
+}
+
+.ac-pl-bulk-bar__hint {
+    font-size: .78rem;
+    color: #1d4ed8;
+}
+
+.ac-pl-bulk-bar__field {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+}
+
+.ac-pl-bulk-bar__lbl {
+    font-size: .75rem;
+    color: var(--ac-text-muted);
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    white-space: nowrap;
+}
+
+.ac-pl-bulk-inp {
+    width: 120px;
+}
+
+/* ── Governorates table ────────────────────────────────────────────────── */
+.ac-pl-tbl-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--ac-border);
+    border-radius: .5rem;
+}
+
+.ac-pl-tbl {
+    width: 100%;
+    min-width: 520px;
+    border-collapse: collapse;
+    font-size: .875rem;
+    table-layout: fixed;
+}
+
+.ac-pl-tbl thead tr {
+    background: var(--ac-bg);
+    border-bottom: 1px solid var(--ac-border);
+}
+
+.ac-pl-tbl thead th {
+    padding: .6rem .85rem;
+    text-align: right;
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--ac-text-muted);
+    white-space: nowrap;
+}
+
+.ac-pl-tbl tbody tr {
+    border-bottom: 1px solid var(--ac-border);
+    transition: background .12s;
+}
+
+.ac-pl-tbl tbody tr:last-child {
+    border-bottom: none;
+}
+
+.ac-pl-tbl tbody td {
+    padding: .45rem .85rem;
+    vertical-align: middle;
+}
+
+/* ── Row states ────────────────────────────────────────────────────────── */
+.ac-pl-row {
+    opacity: .65;
+    transition: opacity .15s, background .15s;
+}
+
+.ac-pl-row--active {
+    opacity: 1;
+    background: #f8fbff;
+}
+
+.ac-pl-row--missing {
+    background: #fff7ed;
+}
+
+.ac-pl-row--missing .ac-pl-delivery-inp {
+    border-color: #fb923c;
+    box-shadow: 0 0 0 2px rgba(251, 146, 60, .12);
+}
+
+.ac-pl-row--active .ac-pl-tbl__name {
+    font-weight: 600;
+    color: var(--ac-text);
+}
+
+/* ── Table column specifics ────────────────────────────────────────────── */
+.ac-pl-tbl__check-col {
+    width: 36px;
+    text-align: center !important;
+}
+
+.ac-pl-tbl__name {
+    font-size: .875rem;
+    color: var(--ac-text);
+}
+
+.ac-pl-tbl__prices-col {
+    width: 300px;
+    padding: .35rem .65rem;
+}
+
+/* ── Two prices in one cell ────────────────────────────────────────────── */
+.ac-pl-two-prices {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ac-pl-two-prices__sep {
+    flex-shrink: 0;
+    width: 1px;
+    height: 24px;
+    background: var(--ac-border);
+}
+
+.ac-pl-two-prices .ac-control {
+    flex: 1;
+    min-width: 0;
+    font-size: .82rem;
+    padding: 6px 8px;
+}
+
+.ac-pl-two-prices .ac-control:disabled {
+    opacity: .45;
+}
+
+/* ── Prices header (two labels in one th) ──────────────────────────────── */
+.ac-pl-prices-hdr {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: .5rem;
+}
+
+/* ── Table header badges ───────────────────────────────────────────────── */
+.ac-pl-th-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    font-size: .75rem;
+    font-weight: 600;
+    padding: .15rem .45rem;
+    border-radius: .3rem;
+}
+
+.ac-pl-th-badge--delivery {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.ac-pl-th-badge--return {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.ac-pl-th-required {
+    color: #ef4444;
+    font-size: .8rem;
+    margin-right: .15rem;
+}
+
+.ac-pl-th-optional {
+    font-size: .72rem;
+    color: var(--ac-text-muted);
+    margin-right: .25rem;
+}
+
+/* ── Price inputs in table ─────────────────────────────────────────────── */
+.ac-pl-price-inp {
+    width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+.ac-pl-price-inp:disabled {
+    opacity: .35;
+    cursor: not-allowed;
+}
+
+/* ── Show page: price values ───────────────────────────────────────────── */
+.ac-pl-show-price {
+    display: inline-flex;
+    align-items: baseline;
+    gap: .2rem;
+    font-weight: 700;
+    font-size: .9rem;
+}
+
+.ac-pl-show-price--delivery { color: #1d4ed8; }
+.ac-pl-show-price--return   { color: #92400e; }
+
+.ac-pl-show-currency {
+    font-size: .72rem;
+    font-weight: 400;
+    color: var(--ac-text-muted);
+}
+
+/* ── Show-only table (no checkbox col) ─────────────────────────────────── */
+.ac-pl-tbl--show thead th,
+.ac-pl-tbl--show tbody td {
+    padding: .5rem 1rem;
+}
+
+/* ── Side panel stats ──────────────────────────────────────────────────── */
+.ac-pl-side-stats {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    background: var(--ac-bg);
+    border-radius: .45rem;
+    padding: .65rem .75rem;
+    margin-top: .4rem;
+}
+
+.ac-pl-side-stat {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: .5rem;
+}
+
+.ac-pl-side-stat__label {
+    font-size: .79rem;
+    color: var(--ac-text-muted);
+    min-width: 0;
+    line-height: 1.35;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.ac-pl-side-stat__val {
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--ac-text);
+    white-space: nowrap;
+}
+
+.ac-pl-readiness {
+    margin-top: 1rem;
+    border: 1px solid var(--ac-border);
+    border-radius: .6rem;
+    padding: .8rem;
+    background: #fcfcfd;
+    display: flex;
+    flex-direction: column;
+    gap: .55rem;
+}
+
+.ac-pl-readiness__title {
+    margin: 0;
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--ac-text);
+}
+
+.ac-pl-readiness__item {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .8rem;
+    color: var(--ac-text-muted);
+}
+
+.ac-pl-readiness__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    flex-shrink: 0;
+}
+
+.ac-pl-readiness__item.is-ready {
+    color: #166534;
+}
+
+.ac-pl-readiness__item.is-ready .ac-pl-readiness__dot {
+    background: #22c55e;
+}
+
+.ac-pl-readiness__item.is-pending .ac-pl-readiness__dot {
+    background: #f59e0b;
+}
+
+/* ── Customer multi-select box ─────────────────────────────────────────── */
+.ac-pl-cust-box {
+    border: 1.5px solid var(--ac-border);
+    border-radius: .5rem;
+    background: var(--ac-surface);
+    position: relative;
+    transition: border-color .15s;
+    overflow: hidden;
+}
+
+.ac-pl-cust-box:focus-within {
+    border-color: var(--ac-primary);
+    box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+}
+
+.ac-pl-cust-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    padding: .55rem .75rem .35rem;
+    min-height: 2.6rem;
+}
+
+.ac-pl-cust-placeholder {
+    font-size: .82rem;
+    color: var(--ac-text-muted);
+    align-self: center;
+}
+
+.ac-pl-cust-head {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: .7rem;
+}
+
+/* ── Chip ──────────────────────────────────────────────────────────────── */
+.ac-pl-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    background: #dbeafe;
+    color: #1e40af;
+    border-radius: 99px;
+    padding: .18rem .5rem .18rem .65rem;
+    font-size: .8rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.ac-pl-chip__rm {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #3b82f6;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0 .1rem;
+    border-radius: 50%;
+    transition: background .1s, color .1s;
+}
+
+.ac-pl-chip__rm:hover {
+    background: #bfdbfe;
+    color: #1e3a8a;
+}
+
+/* ── Search row inside the box ─────────────────────────────────────────── */
+.ac-pl-cust-search-wrap {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .3rem .75rem .5rem;
+    border-top: 1px solid var(--ac-border);
+}
+
+.ac-pl-cust-search-icon {
+    color: var(--ac-text-muted);
+    flex-shrink: 0;
+}
+
+.ac-pl-cust-search {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: .85rem;
+    width: 100%;
+    color: var(--ac-text);
+}
+
+.ac-pl-cust-search::placeholder { color: var(--ac-text-muted); }
+
+/* ── Dropdown ──────────────────────────────────────────────────────────── */
+.ac-pl-cust-dropdown {
+    position: static;
+    background: var(--ac-surface);
+    border-top: 1px solid var(--ac-border);
+    border-radius: 0;
+    box-shadow: none;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.ac-pl-cust-opt {
+    padding: .55rem .85rem;
+    font-size: .855rem;
+    cursor: pointer;
+    transition: background .1s;
+}
+
+.ac-pl-cust-opt:hover { background: var(--ac-bg); }
+
+.ac-pl-cust-empty {
+    padding: .75rem .85rem;
+    font-size: .82rem;
+    color: var(--ac-text-muted);
+    text-align: center;
+}
+
+/* ── Customer tags (show page) ─────────────────────────────────────────── */
+.ac-pl-cust-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem;
+    margin-top: .25rem;
+}
+
+.ac-pl-cust-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    background: var(--ac-bg);
+    border: 1px solid var(--ac-border);
+    border-radius: 99px;
+    padding: .25rem .75rem;
+    font-size: .82rem;
+    color: var(--ac-text);
+    text-decoration: none;
+    transition: border-color .15s, background .15s;
+}
+
+.ac-pl-cust-tag:hover {
+    border-color: var(--ac-primary);
+    background: #eff6ff;
+    color: var(--ac-primary);
+}
+
+/* ── Custom checkbox ───────────────────────────────────────────────────── */
+.ac-checkbox {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--ac-primary);
+    cursor: pointer;
+}
+
+/* ── Governorates page layout ──────────────────────────────────────────── */
+.ac-gov-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.ac-gov-add-card { position: sticky; top: 1rem; }
+
+.ac-gov-add-form {
+    display: flex;
+    gap: .5rem;
+}
+
+.ac-gov-add-form__input { flex: 1; min-width: 0; }
+
+/* ── btn--success-ghost ────────────────────────────────────────────────── */
+.ac-btn--success-ghost {
+    color: #16a34a;
+    border-color: #16a34a;
+}
+.ac-btn--success-ghost:hover { background: #f0fdf4; }
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+@media (max-width: 960px) {
+    .ac-pl-layout {
+        grid-template-columns: 1fr;
+    }
+    .ac-pl-side { order: -1; }
+    .ac-pl-info-row { flex-direction: column; gap: 0; }
+    .ac-pl-create-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ac-pl-create-hero__steps { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+    .ac-pl-create-summary { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 720px) {
+    .ac-gov-layout { grid-template-columns: 1fr; }
+    .ac-gov-add-card { position: static; }
+    .ac-pl-tbl { min-width: 680px; }
+    .ac-pl-tbl__price-col {
+        width: 160px;
+        min-width: 160px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ac-pl-bulk-bar { flex-direction: column; align-items: flex-start; }
+    .ac-pl-bulk-bar__fields { width: 100%; }
+    .ac-pl-bulk-inp { width: 100%; }
+}
+
+/* Section 54 - Customer Shipments */
+.ac-sh-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.ac-sh-main,
+.ac-sh-side {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.ac-sh-hero {
+    background: linear-gradient(135deg, #ecfeff 0%, #f8fafc 100%);
+    border: 1px solid #a5f3fc;
+}
+
+.ac-sh-hero__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: .75rem;
+}
+
+.ac-sh-hero__title {
+    margin: .2rem 0 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.ac-sh-hero__badge {
+    font-size: .72rem;
+    font-weight: 700;
+    color: #0f766e;
+    background: #ccfbf1;
+    border-radius: 999px;
+    padding: .25rem .6rem;
+}
+
+.ac-sh-hero__steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .55rem;
+}
+
+.ac-sh-hero__step {
+    background: rgba(255, 255, 255, .82);
+    border: 1px solid #bae6fd;
+    border-radius: .45rem;
+    padding: .45rem .55rem;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .8rem;
+}
+
+.ac-sh-hero__step span {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #0891b2;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .7rem;
+    font-weight: 700;
+}
+
+.ac-sh-top-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.ac-sh-table-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: .8rem;
+    flex-wrap: wrap;
+}
+
+.ac-sh-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--ac-border);
+    border-radius: .5rem;
+}
+
+.ac-sh-table {
+    width: 100%;
+    min-width: 1150px;
+    border-collapse: collapse;
+    font-size: .85rem;
+}
+
+.ac-sh-table thead tr {
+    background: var(--ac-bg);
+    border-bottom: 1px solid var(--ac-border);
+}
+
+.ac-sh-table th,
+.ac-sh-table td {
+    padding: .6rem .7rem;
+    text-align: right;
+    vertical-align: top;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.ac-sh-table th {
+    font-size: .78rem;
+    color: var(--ac-text-muted);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.ac-sh-row__num {
+    font-weight: 700;
+    color: var(--ac-text-muted);
+    text-align: center !important;
+}
+
+.ac-sh-source {
+    margin-top: .3rem;
+    font-size: .72rem;
+    color: var(--ac-text-muted);
+    line-height: 1.4;
+}
+
+.ac-sh-code {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 64px;
+    padding: .2rem .55rem;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: .75rem;
+    font-weight: 700;
+}
+
+.ac-sh-stats {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    background: var(--ac-bg);
+    border-radius: .45rem;
+    padding: .65rem .75rem;
+}
+
+.ac-sh-stat {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: .5rem;
+    align-items: center;
+}
+
+.ac-sh-stat__label {
+    font-size: .79rem;
+    color: var(--ac-text-muted);
+}
+
+.ac-sh-stat__value {
+    font-size: .92rem;
+    font-weight: 700;
+    color: var(--ac-text);
+}
+
+.ac-sh-readiness {
+    margin-top: 1rem;
+    border: 1px solid var(--ac-border);
+    border-radius: .6rem;
+    padding: .8rem;
+    background: #fcfcfd;
+    display: flex;
+    flex-direction: column;
+    gap: .55rem;
+}
+
+.ac-sh-readiness__title {
+    margin: 0;
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--ac-text);
+}
+
+.ac-sh-readiness__item {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .8rem;
+    color: var(--ac-text-muted);
+}
+
+.ac-sh-readiness__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    flex-shrink: 0;
+}
+
+.ac-sh-readiness__item.is-ready {
+    color: #166534;
+}
+
+.ac-sh-readiness__item.is-ready .ac-sh-readiness__dot {
+    background: #22c55e;
+}
+
+.ac-sh-readiness__item.is-pending .ac-sh-readiness__dot {
+    background: #f59e0b;
+}
+
+@media (max-width: 960px) {
+    .ac-sh-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .ac-sh-side {
+        order: -1;
+    }
+
+    .ac-sh-hero__steps,
+    .ac-sh-top-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Price list badge in customers table ───────────────────────────────── */
+.ac-pl-cust-badge {
+    display: inline-flex;
+    align-items: center;
+    background: #dbeafe;
+    color: #1e40af;
+    border-radius: .35rem;
+    padding: .2rem .6rem;
+    font-size: .78rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background .15s;
+}
+.ac-pl-cust-badge:hover { background: #bfdbfe; }
+.ac-pl-cust-badge--inactive {
+    background: var(--ac-bg);
+    color: var(--ac-text-muted);
+    text-decoration: line-through;
+}
+
+/* ── Price list card link in customer show page ────────────────────────── */
+.ac-pl-card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    background: #f0f7ff;
+    border: 1px solid #bfdbfe;
+    border-radius: .5rem;
+    padding: .45rem .85rem;
+    font-size: .875rem;
+    font-weight: 600;
+    color: #1d4ed8;
+    text-decoration: none;
+    transition: border-color .15s, background .15s;
+}
+.ac-pl-card-link:hover {
+    background: #dbeafe;
+    border-color: #93c5fd;
+}
+.ac-pl-card-link--inactive {
+    background: var(--ac-bg);
+    border-color: var(--ac-border);
+    color: var(--ac-text-muted);
+}
+.ac-pl-card-link__badge {
+    font-size: .72rem;
+    background: var(--ac-border);
+    color: var(--ac-text-muted);
+    border-radius: .25rem;
+    padding: .08rem .35rem;
+    font-weight: 400;
+}
+
+/* ── Default price list badge (star) ───────────────────────────────────── */
+.ac-pl-default-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    font-size: .72rem;
+    font-weight: 600;
+    color: #92400e;
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    border-radius: .9rem;
+    padding: .15rem .55rem;
+    line-height: 1;
+}
+.ac-pl-default-badge svg {
+    color: #d97706;
+    flex-shrink: 0;
+}
+
+/* ── Warning ghost button (for "افتراضية" state) ───────────────────────── */
+.ac-btn--warning-ghost {
+    background: transparent;
+    color: #d97706;
+    border: 1px solid #fde68a;
+}
+.ac-btn--warning-ghost:hover {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #92400e;
+}
+
+/* ── Success ghost button (for "تفعيل" state) ──────────────────────────── */
+.ac-btn--success-ghost {
+    background: transparent;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+.ac-btn--success-ghost:hover {
+    background: #dcfce7;
+    border-color: #86efac;
+    color: #166534;
+}

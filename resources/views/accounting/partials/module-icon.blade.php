@@ -279,6 +279,33 @@
         </svg>
         @break
 
+    @case('price_list')
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+            <rect x="9" y="3" width="6" height="4" rx="1"/>
+            <line x1="9" y1="12" x2="15" y2="12"/>
+            <line x1="9" y1="16" x2="13" y2="16"/>
+        </svg>
+        @break
+
+    @case('governorates')
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/>
+            <circle cx="12" cy="10" r="3"/>
+        </svg>
+        @break
+
+    @case('customer_shipments')
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 7h13l3 4v6a2 2 0 0 1-2 2h-1"/>
+            <path d="M3 7v10a2 2 0 0 0 2 2h1"/>
+            <path d="M3 7l2-3h9"/>
+            <circle cx="8" cy="18" r="2"/>
+            <circle cx="17" cy="18" r="2"/>
+            <path d="M9 12h5"/>
+        </svg>
+        @break
+
     @default
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/>

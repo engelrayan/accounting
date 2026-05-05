@@ -132,4 +132,45 @@ class FiscalYearController extends Controller
                 "صافي النتيجة: {$profitLabel}."
             );
     }
+
+    public function reopen(Request $request, FiscalYear $fiscalYear): RedirectResponse
+    {
+        Gate::authorize('can-write');
+        abort_if($fiscalYear->company_id !== $request->user()->company_id, 403);
+
+        if ($fiscalYear->isOpen()) {
+            return back()->with('info', 'هذه السنة المالية مفتوحة بالفعل.');
+        }
+
+        $companyId = (int) $request->user()->company_id;
+        $existingOpen = FiscalYear::forCompany($companyId)
+            ->open()
+            ->where('id', '!=', $fiscalYear->id)
+            ->exists();
+
+        if ($existingOpen) {
+            return back()->withErrors([
+                'reopen' => 'يوجد سنة مالية مفتوحة بالفعل. أغلقها أولًا قبل إعادة فتح سنة أخرى.',
+            ]);
+        }
+
+        $fiscalYear->update([
+            'status' => 'open',
+            'closed_at' => null,
+            'closed_by' => null,
+        ]);
+
+        $this->log->log(
+            $companyId,
+            'updated',
+            'fiscal_year',
+            $fiscalYear->id,
+            "سنة {$fiscalYear->year}",
+            "إعادة فتح السنة المالية [{$fiscalYear->year}] بعد إغلاقها."
+        );
+
+        return redirect()
+            ->route('accounting.fiscal-years.index')
+            ->with('success', "تمت إعادة فتح السنة المالية {$fiscalYear->year} بنجاح.");
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Modules\Accounting\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
@@ -46,6 +47,13 @@ class Customer extends Model
             'id',
             'id',
         )->orderByDesc('payment_date');
+    }
+
+    /** قوائم الأسعار المرتبطة بهذا العميل */
+    public function priceLists(): BelongsToMany
+    {
+        return $this->belongsToMany(PriceList::class, 'price_list_customers')
+                    ->withTimestamps();
     }
 
     // Legacy (kept for backward compatibility — do not use in new code)

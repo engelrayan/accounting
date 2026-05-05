@@ -31,6 +31,9 @@ use App\Modules\Accounting\Http\Controllers\RecurringEntryController;
 use App\Modules\Accounting\Http\Controllers\VendorController;
 use App\Modules\Accounting\Http\Controllers\QuotationController;
 use App\Modules\Accounting\Http\Controllers\PurchaseOrderController;
+use App\Modules\Accounting\Http\Controllers\PriceListController;
+use App\Modules\Accounting\Http\Controllers\GovernorateController;
+use App\Modules\Accounting\Http\Controllers\CustomerShipmentController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin/accounting')
@@ -231,6 +234,7 @@ Route::prefix('admin/accounting')
         Route::get ('fiscal-years',                             [FiscalYearController::class, 'index']) ->name('fiscal-years.index');
         Route::post('fiscal-years',                             [FiscalYearController::class, 'store']) ->name('fiscal-years.store');
         Route::post('fiscal-years/{fiscalYear}/close',          [FiscalYearController::class, 'close']) ->name('fiscal-years.close');
+        Route::post('fiscal-years/{fiscalYear}/reopen',         [FiscalYearController::class, 'reopen'])->name('fiscal-years.reopen');
 
         // ------------------------------------------------------------------
         // Company Settings
@@ -355,6 +359,40 @@ Route::prefix('admin/accounting')
         Route::post('purchase-orders/{purchaseOrder}/receive',[PurchaseOrderController::class, 'receive']) ->middleware('module:purchase_orders')->name('purchase-orders.receive');
         Route::post('purchase-orders/{purchaseOrder}/cancel', [PurchaseOrderController::class, 'cancel'])  ->middleware('module:purchase_orders')->name('purchase-orders.cancel');
         Route::post('purchase-orders/{purchaseOrder}/convert',[PurchaseOrderController::class, 'convertToInvoice'])->middleware('module:purchase_orders')->name('purchase-orders.convert');
+
+        // ------------------------------------------------------------------
+        // Price Lists (قوائم الأسعار — شركات النقل)
+        // ------------------------------------------------------------------
+        Route::resource('price-lists', PriceListController::class)
+            ->only(['index', 'create', 'store', 'show', 'edit', 'update'])
+            ->middleware('module:price_lists');
+
+        Route::post('price-lists/{priceList}/toggle', [PriceListController::class, 'toggle'])
+            ->middleware('module:price_lists')
+            ->name('price-lists.toggle');
+
+        Route::post('price-lists/{priceList}/set-default', [PriceListController::class, 'setDefault'])
+            ->middleware('module:price_lists')
+            ->name('price-lists.set-default');
+
+        // ------------------------------------------------------------------
+        // Governorates (المحافظات — مرجع قابل للتوسعة)
+        // ------------------------------------------------------------------
+        Route::get   ('governorates',                       [GovernorateController::class, 'index'])   ->middleware('module:governorates')->name('governorates.index');
+        Route::post  ('governorates',                       [GovernorateController::class, 'store'])   ->middleware('module:governorates')->name('governorates.store');
+        Route::post  ('governorates/{governorate}/toggle',  [GovernorateController::class, 'toggle'])  ->middleware('module:governorates')->name('governorates.toggle');
+        Route::delete('governorates/{governorate}',         [GovernorateController::class, 'destroy']) ->middleware('module:governorates')->name('governorates.destroy');
+
+        // ------------------------------------------------------------------
+        // Customer Shipments
+        // ------------------------------------------------------------------
+        Route::get ('customer-shipments',                               [CustomerShipmentController::class, 'index'])       ->middleware('module:customer_shipments')->name('customer-shipments.index');
+        Route::get ('customer-shipments/create',                        [CustomerShipmentController::class, 'create'])      ->middleware('module:customer_shipments')->name('customer-shipments.create');
+        Route::post('customer-shipments',                               [CustomerShipmentController::class, 'store'])       ->middleware('module:customer_shipments')->name('customer-shipments.store');
+        Route::get ('customer-shipments/resolve-price',                 [CustomerShipmentController::class, 'resolvePrice'])->middleware('module:customer_shipments')->name('customer-shipments.resolve-price');
+        Route::get ('customer-shipments/{customerShipment}',            [CustomerShipmentController::class, 'show'])        ->middleware('module:customer_shipments')->name('customer-shipments.show');
+        Route::get ('customer-shipments/{customerShipment}/edit',       [CustomerShipmentController::class, 'edit'])        ->middleware('module:customer_shipments')->name('customer-shipments.edit');
+        Route::put ('customer-shipments/{customerShipment}',            [CustomerShipmentController::class, 'update'])      ->middleware('module:customer_shipments')->name('customer-shipments.update');
     });
 
 Route::prefix('admin/settings/modules')

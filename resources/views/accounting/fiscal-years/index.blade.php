@@ -43,6 +43,9 @@
 @if ($errors->has('year'))
     <div class="ac-alert ac-alert--danger">{{ $errors->first('year') }}</div>
 @endif
+@if ($errors->has('reopen'))
+    <div class="ac-alert ac-alert--danger">{{ $errors->first('reopen') }}</div>
+@endif
 
 {{-- ══════════════════════════════════════════════════════════════════════════
      OPEN YEAR
@@ -273,6 +276,7 @@
                     <th>صافي النتيجة</th>
                     <th>قيد الإقفال</th>
                     <th>تاريخ الإغلاق</th>
+                    <th>الإجراء</th>
                 </tr>
             </thead>
             <tbody>
@@ -301,6 +305,20 @@
                         </td>
                         <td style="font-size:.82rem;color:var(--ac-muted);">
                             {{ $fy->closed_at?->format('Y/m/d H:i') ?? '—' }}
+                        </td>
+                        <td>
+                            @can('can-write')
+                                <form method="POST"
+                                      action="{{ route('accounting.fiscal-years.reopen', $fy) }}"
+                                      onsubmit="return confirm('سيتم إعادة فتح السنة المالية {{ $fy->year }}. هل تريد المتابعة؟');">
+                                    @csrf
+                                    <button type="submit" class="ac-btn ac-btn--ghost ac-btn--sm">
+                                        إعادة فتح
+                                    </button>
+                                </form>
+                            @else
+                                <span style="color:var(--ac-muted);font-size:.8rem;">—</span>
+                            @endcan
                         </td>
                     </tr>
                 @endforeach

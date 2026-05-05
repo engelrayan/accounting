@@ -182,6 +182,38 @@
 @endif
 
 @can('can-write')
+{{-- ── Price Lists ─────────────────────────────────────────────────────────────── --}}
+@if($customer->priceLists->isNotEmpty())
+<div class="ac-card ac-card--compact" style="margin-bottom:1.25rem">
+    <div class="ac-card__body">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem">
+            <p class="ac-section-label" style="margin:0">قوائم الأسعار المرتبطة</p>
+            @can('can-write')
+            <a href="{{ route('accounting.price-lists.index') }}"
+               class="ac-btn ac-btn--ghost ac-btn--xs">إدارة القوائم</a>
+            @endcan
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:.65rem">
+            @foreach($customer->priceLists as $pl)
+            <a href="{{ route('accounting.price-lists.show', $pl) }}"
+               class="ac-pl-card-link {{ !$pl->is_active ? 'ac-pl-card-link--inactive' : '' }}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                    <rect x="9" y="3" width="6" height="4" rx="1"/>
+                    <line x1="9" y1="12" x2="15" y2="12"/>
+                    <line x1="9" y1="16" x2="13" y2="16"/>
+                </svg>
+                <span>{{ $pl->name }}</span>
+                @if(!$pl->is_active)
+                    <span class="ac-pl-card-link__badge">معطّلة</span>
+                @endif
+            </a>
+            @endforeach
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- ── Action Panels ─────────────────────────────────────────────────────────── --}}
 <div class="ac-partner-actions" id="pay-panel">
 
