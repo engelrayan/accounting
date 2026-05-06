@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class PriceListController extends Controller
@@ -84,7 +85,13 @@ class PriceListController extends Controller
         $customerIds  = array_filter(array_map('intval', $request->input('customer_ids', [])));
         $validGovIds  = Governorate::active()->pluck('id')->all();
 
-        $priceList = DB::transaction(function () use ($request, $govs, $customerIds, $validGovIds, $companyId) {
+        $legacyGovernorateColumnExists = Schema::hasColumn('price_list_items', 'governorate');
+        $governoratesById = Governorate::query()
+            ->whereIn('id', $validGovIds)
+            ->get(['id', 'name_ar'])
+            ->keyBy('id');
+
+        $priceList = DB::transaction(function () use ($request, $govs, $customerIds, $validGovIds, $companyId, $legacyGovernorateColumnExists, $governoratesById) {
             $pl = PriceList::create([
                 'company_id'  => $companyId,
                 'name'        => $request->input('name'),
@@ -104,7 +111,7 @@ class PriceListController extends Controller
                     ? (float) $govData['return_price']
                     : null;
 
-                $items[] = [
+                $item = [
                     'price_list_id'  => $pl->id,
                     'governorate_id' => (int) $govId,
                     'price'          => (float) $govData['price'],
@@ -113,6 +120,12 @@ class PriceListController extends Controller
                     'created_at'     => $now,
                     'updated_at'     => $now,
                 ];
+
+                if ($legacyGovernorateColumnExists) {
+                    $item['governorate'] = $governoratesById->get((int) $govId)?->name_ar ?? '';
+                }
+
+                $items[] = $item;
             }
 
             if ($items) {
@@ -203,7 +216,13 @@ class PriceListController extends Controller
         $customerIds = array_filter(array_map('intval', $request->input('customer_ids', [])));
         $validGovIds = Governorate::active()->pluck('id')->all();
 
-        DB::transaction(function () use ($request, $govs, $customerIds, $validGovIds, $priceList) {
+        $legacyGovernorateColumnExists = Schema::hasColumn('price_list_items', 'governorate');
+        $governoratesById = Governorate::query()
+            ->whereIn('id', $validGovIds)
+            ->get(['id', 'name_ar'])
+            ->keyBy('id');
+
+        DB::transaction(function () use ($request, $govs, $customerIds, $validGovIds, $priceList, $legacyGovernorateColumnExists, $governoratesById) {
             $priceList->update([
                 'name'        => $request->input('name'),
                 'description' => $request->input('description'),
@@ -224,7 +243,7 @@ class PriceListController extends Controller
                     ? (float) $govData['return_price']
                     : null;
 
-                $items[] = [
+                $item = [
                     'price_list_id'  => $priceList->id,
                     'governorate_id' => (int) $govId,
                     'price'          => (float) $govData['price'],
@@ -233,6 +252,12 @@ class PriceListController extends Controller
                     'created_at'     => $now,
                     'updated_at'     => $now,
                 ];
+
+                if ($legacyGovernorateColumnExists) {
+                    $item['governorate'] = $governoratesById->get((int) $govId)?->name_ar ?? '';
+                }
+
+                $items[] = $item;
             }
 
             if ($items) {
