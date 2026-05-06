@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (!Schema::hasTable('price_lists') || Schema::hasColumn('price_lists', 'is_default')) {
+            return;
+        }
+
         Schema::table('price_lists', function (Blueprint $table) {
             $table->boolean('is_default')->default(false)->after('is_active');
         });
@@ -15,6 +19,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (!Schema::hasTable('price_lists') || !Schema::hasColumn('price_lists', 'is_default')) {
+            return;
+        }
+
         Schema::table('price_lists', function (Blueprint $table) {
             $table->dropColumn('is_default');
         });
